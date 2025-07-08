@@ -1,0 +1,12 @@
+{% extends 'registration/base.html' %}
+
+{% block content %}
+<h2>Two-Factor Authentication</h2>
+<p>We've sent a verification code to <strong>{{ email }}</strong>. Please enter it below:</p>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Verify</button>
+</form>
+<p>Didn't receive the code? <a href="{% url 'login' %}">Try again</a></p>
+{% endblock %}

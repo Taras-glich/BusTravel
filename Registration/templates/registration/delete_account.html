@@ -1,0 +1,14 @@
+{% extends 'registration/base.html' %}
+{% load i18n %}
+
+{% block content %}
+<h2>{% trans "Delete account" %}</h2>
+<p class="text-danger">{% trans "Warning: This action cannot be undone. All your data will be permanently deleted." %}</p>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-danger">{% trans "Delete my account" %}</button>
+    <a href="{% url 'profile' %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
+</form>
+{% endblock %}

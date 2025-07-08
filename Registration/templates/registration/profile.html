@@ -1,0 +1,34 @@
+{% extends 'registration/base.html' %}
+{% load i18n %}
+
+{% block content %}
+<h2>{% trans "Profile" %}</h2>
+
+<p><strong>{% trans "Username" %}:</strong> {{ user.username }}</p>
+<p><strong>{% trans "Email" %}:</strong> {{ user.email }}</p>
+<p><strong>{% trans "Account created" %}:</strong> {{ user.date_joined|date:"Y-m-d H:i" }}</p>
+
+<h3>{% trans "Language settings" %}</h3>
+<form method="post" action="{% url 'change_language' %}">
+    {% csrf_token %}
+    {{ language_form.as_p }}
+</form>
+
+<h3>{% trans "Change password" %}</h3>
+<a href="{% url 'change_password' %}" class="btn btn-primary">{% trans "Change password" %}</a>
+
+<h3>{% trans "Two-factor authentication" %}</h3>
+<p>{% trans "Status" %}:
+    {% if user.two_factor_auth %}
+        {% trans "Enabled" %}
+    {% else %}
+        {% trans "Disabled" %}
+    {% endif %}
+    (<a href="{% url 'toggle_two_factor' %}">{% trans "Toggle" %}</a>)
+</p>
+
+<h3>{% trans "Danger zone" %}</h3>
+<a href="{% url 'delete_account' %}" class="btn btn-danger">{% trans "Delete account" %}</a>
+
+<a href="{% url 'logout' %}" class="btn btn-secondary">{% trans "Logout" %}</a>
+{% endblock %}
