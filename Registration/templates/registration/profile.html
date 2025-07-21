@@ -8,6 +8,17 @@
 <p><strong>{% trans "Email" %}:</strong> {{ user.email }}</p>
 <p><strong>{% trans "Account created" %}:</strong> {{ user.date_joined|date:"Y-m-d H:i" }}</p>
 
+{% if user.deleted_at %}
+  <div class="alert alert-warning">
+    {% trans "Your account is scheduled for deletion on" %} {{ user.deleted_at|date:"Y-m-d H:i" }}.
+    {% trans "You can restore it before this date." %}
+  </div>
+  <form method="post" action="{% url 'restore_account' %}">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-success">{% trans "Restore account" %}</button>
+  </form>
+{% endif %}
+
 <h3>{% trans "Language settings" %}</h3>
 <form method="post" action="{% url 'change_language' %}">
     {% csrf_token %}
@@ -27,8 +38,26 @@
     (<a href="{% url 'toggle_two_factor' %}">{% trans "Toggle" %}</a>)
 </p>
 
-<h3>{% trans "Danger zone" %}</h3>
-<a href="{% url 'delete_account' %}" class="btn btn-danger">{% trans "Delete account" %}</a>
+
 
 <a href="{% url 'logout' %}" class="btn btn-secondary">{% trans "Logout" %}</a>
+
+{% if pending_deletion %}
+    <h3>{% trans "Danger zone" %}</h3>
+    <a href="{% url 'permanent_delete_account' %}" class="btn btn-danger">{% trans "Full delete account" %}</a>
+    <div class="alert alert-warning">
+        {% blocktrans with days=user.deletion_days_left %}
+            Ваш акаунт заплановано на видалення через {{ days }} днів.
+        {% endblocktrans %}
+        <form method="post" action="{% url 'cancel_account_deletion' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-secondary mt-2">{% trans "Скасувати видалення" %}</button>
+        </form>
+    </div>
+    {% else %}
+    <h3>{% trans "Danger zone" %}</h3>
+    <a href="{% url 'delete_account' %}" class="btn btn-danger">{% trans "Delete account" %}</a>
+{% endif %}
+
+
 {% endblock %}

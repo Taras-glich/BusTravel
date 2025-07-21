@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'Registration.apps.RegistrationConfig',
+    'django_recaptcha',
 ]
 
 MIDDLEWARE = [
@@ -138,3 +139,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
+
+RECAPTCHA_PUBLIC_KEY = '6Lfd5mIrAAAAAHeQf1hOY8Xf8-Z0lUfBf5b2INFZ'
+RECAPTCHA_PRIVATE_KEY = '6Lfd5mIrAAAAAIXf8lIj6x4EO2uRZ86q_vBYIv65'
+NOCAPTCHA = True
+
+AUTHENTICATION_BACKENDS = [
+    'Registration.backends.EmailOrUsernameModelBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]

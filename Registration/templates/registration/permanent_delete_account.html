@@ -1,0 +1,11 @@
+{% extends 'registration/base.html' %}
+{% block content %}
+  <h2>Permanent Account Deletion</h2>
+  <p>Are you sure you want to permanently delete your account? This action cannot be undone.</p>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-danger">Delete Permanently</button>
+    <a href="{% url 'profile' %}" class="btn btn-secondary">Cancel</a>
+  </form>
+{% endblock %}

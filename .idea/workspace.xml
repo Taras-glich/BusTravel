@@ -5,7 +5,38 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5d8cff05-bb4f-47a9-8432-d1c9809a7647" name="Changes" comment="h">
+      <change afterPath="$PROJECT_DIR$/Registration/backends.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Registration/management/commands/delete_expired_accounts.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Registration/templates/registration/permanent_delete_account.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/DjangoProject5.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/DjangoProject5.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BusTravel/asgi.py" beforeDir="false" afterPath="$PROJECT_DIR$/BusTravel/asgi.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BusTravel/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/BusTravel/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BusTravel/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/BusTravel/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BusTravel/wsgi.py" beforeDir="false" afterPath="$PROJECT_DIR$/BusTravel/wsgi.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Registration/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/Registration/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Registration/apps.py" beforeDir="false" afterPath="$PROJECT_DIR$/Registration/apps.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Registration/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/Registration/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Registration/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/Registration/migrations/0001_initial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Registration/migrations/0002_user_two_factor_code_user_two_factor_code_expires_and_more.py" beforeDir="false" afterPath="$PROJECT_DIR$/Registration/migrations/0002_user_two_factor_code_user_two_factor_code_expires_and_more.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Registration/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/Registration/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Registration/templates/registration/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/Registration/templates/registration/base.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Registration/templates/registration/change_password.html" beforeDir="false" afterPath="$PROJECT_DIR$/Registration/templates/registration/change_password.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Registration/templates/registration/delete_account.html" beforeDir="false" afterPath="$PROJECT_DIR$/Registration/templates/registration/delete_account.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Registration/templates/registration/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/Registration/templates/registration/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Registration/templates/registration/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/Registration/templates/registration/login.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Registration/templates/registration/profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/Registration/templates/registration/profile.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Registration/templates/registration/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/Registration/templates/registration/register.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Registration/templates/registration/two_factor_verify.html" beforeDir="false" afterPath="$PROJECT_DIR$/Registration/templates/registration/two_factor_verify.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Registration/templates/registration/verify_email.html" beforeDir="false" afterPath="$PROJECT_DIR$/Registration/templates/registration/verify_email.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Registration/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/Registration/tests.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Registration/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/Registration/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Registration/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/Registration/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/manage.py" beforeDir="false" afterPath="$PROJECT_DIR$/manage.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -15,19 +46,32 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Python Script" />
         <option value="HTML File" />
+        <option value="Python Script" />
       </list>
     </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Taras-glich&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Taras-glich/BusTravel.git&quot;,
+    &quot;accountId&quot;: &quot;c4abb336-727d-4e51-8e23-23187bb0baab&quot;
+  }
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 1
 }</component>
   <component name="ProjectId" id="2zYLbZ4Doz7jInQtKBecn9nxBg8" />
   <component name="ProjectLevelVcsManager">
+    <OptionsSetting value="false" id="Update" />
     <ConfirmationsSetting value="2" id="Add" />
   </component>
   <component name="ProjectViewState">
@@ -95,6 +139,17 @@
       <workItem from="1751903132969" duration="12436000" />
       <workItem from="1752013250516" duration="3000" />
       <workItem from="1752160856697" duration="4000" />
+      <workItem from="1752685297993" duration="451000" />
+      <workItem from="1752685782098" duration="19000" />
+      <workItem from="1752685858114" duration="15000" />
+      <workItem from="1752685900833" duration="1322000" />
+      <workItem from="1752761722816" duration="463000" />
+      <workItem from="1752762310160" duration="1515000" />
+      <workItem from="1752850543355" duration="1161000" />
+      <workItem from="1752854328817" duration="2176000" />
+      <workItem from="1752856634418" duration="1362000" />
+      <workItem from="1753028392823" duration="592000" />
+      <workItem from="1753108672496" duration="6074000" />
     </task>
     <task id="LOCAL-00001" summary="h">
       <option name="closed" value="true" />

@@ -9,48 +9,67 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import password_validation
 from .models import User
+from django_recaptcha.fields import ReCaptchaField
+from django_recaptcha.widgets import ReCaptchaV2Checkbox
 
 
 class RegisterForm(UserCreationForm):
+    """
+    Форма реєстрації користувача з Captcha та вибором типу акаунту.
+    """
     email = forms.EmailField(
         label=_("Email"),
         required=True,
-        widget=forms.EmailInput(attrs={'autocomplete': 'email'})
+        widget=forms.EmailInput(attrs={'autocomplete': 'email', 'placeholder': _('Enter your email')})
     )
     type = forms.ChoiceField(
         label=_("Account Type"),
         choices=User.TYPE_CHOICES,
         widget=forms.Select()
     )
+    captcha = ReCaptchaField(widget=ReCaptchaV2Checkbox, label=_("Підтвердіть, що ви не робот"))
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password1', 'password2', 'type']
+        fields = ['username', 'email', 'password1', 'password2', 'type', 'captcha']
         labels = {
             'username': _('Username'),
         }
+        widgets = {
+            'username': forms.TextInput(attrs={'placeholder': _('Enter your username')}),
+        }
 
     def clean_email(self):
-        email = self.cleaned_data.get('email')
+        """
+        Перевірка унікальності email.
+        """
+        email = self.cleaned_data.get('email').strip().lower()
         if User.objects.filter(email=email).exists():
             raise ValidationError(_("This email is already in use."))
         return email
 
 
 class LoginForm(AuthenticationForm):
+    """
+    Форма входу з Captcha.
+    """
     username = forms.CharField(
         label=_("Username or Email"),
-        widget=forms.TextInput(attrs={'autocomplete': 'username'})
+        widget=forms.TextInput(attrs={'autocomplete': 'username', 'placeholder': _('Enter username or email')}),
+        strip=True
     )
+    captcha = ReCaptchaField(widget=ReCaptchaV2Checkbox, label=_("Підтвердіть, що ви не робот"))
+
     error_messages = {
-        'invalid_login': _(
-            "Please enter a correct username/email and password."
-        ),
+        'invalid_login': _("Please enter a correct username/email and password."),
         'inactive': _("This account is inactive."),
     }
 
 
 class TwoFactorForm(forms.Form):
+    """
+    Форма для вводу 2FA коду.
+    """
     code = forms.CharField(
         label=_("Verification Code"),
         max_length=6,
@@ -59,15 +78,19 @@ class TwoFactorForm(forms.Form):
         widget=forms.TextInput(attrs={
             'placeholder': '000000',
             'autocomplete': 'off'
-        })
+        }),
+        strip=True
     )
 
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
+    def __init__(self, *args, request=None, **kwargs):
         super().__init__(*args, **kwargs)
+        self.request = request
 
     def clean_code(self):
-        code = self.cleaned_data.get('code', '').strip()
+        """
+        Перевірка правильності та дії 2FA коду.
+        """
+        code = self.cleaned_data.get('code')
         user_id = self.request.session.get('user_to_authenticate')
 
         if not user_id:
@@ -91,6 +114,9 @@ class TwoFactorForm(forms.Form):
 
 
 class CustomPasswordChangeForm(PasswordChangeForm):
+    """
+    Форма зміни пароля користувача.
+    """
     old_password = forms.CharField(
         label=_("Current Password"),
         strip=False,
@@ -119,6 +145,9 @@ class CustomPasswordChangeForm(PasswordChangeForm):
 
 
 class AccountDeleteForm(forms.Form):
+    """
+    Форма підтвердження видалення акаунту.
+    """
     password = forms.CharField(
         label=_("Confirm Password"),
         strip=False,
@@ -131,6 +160,9 @@ class AccountDeleteForm(forms.Form):
 
 
 class LanguageForm(forms.Form):
+    """
+    Форма вибору мови інтерфейсу.
+    """
     language = forms.ChoiceField(
         label=_("Interface Language"),
         choices=User.LANGUAGE_CHOICES,
