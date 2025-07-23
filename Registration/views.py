@@ -2,7 +2,7 @@ import secrets
 import random
 import string
 from datetime import timedelta
-
+from .tasks import send_email_task
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
@@ -49,7 +49,7 @@ def profile_view(request):
 
 @csrf_protect
 def register_view(request):
-    """Реєстрація нового користувача з email-підтвердженням."""
+    """Реєстрація нового користувача з email-підтвердженням через Celery."""
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
@@ -70,13 +70,9 @@ def register_view(request):
                 reverse('verify_email_link') + '?' + urlencode({'token': token})
             )
 
-            send_mail(
-                _('Підтвердіть ваш email'),
-                _('Перейдіть за посиланням для підтвердження: %(url)s') % {'url': verify_url},
-                settings.EMAIL_HOST_USER,
-                [user.email],
-                fail_silently=False,
-            )
+            subject = _('Підтвердіть ваш email')
+            message = _('Перейдіть за посиланням для підтвердження: %(url)s') % {'url': verify_url}
+            send_email_task.delay(subject, message, [user.email])
 
             messages.success(request, _('На вашу пошту надіслано лист для підтвердження.'))
             return redirect('login')
@@ -114,7 +110,7 @@ def verify_email_link_view(request):
 
 @csrf_protect
 def login_view(request):
-    """Вхід користувача з двофакторною автентифікацією (за потреби)."""
+    """Вхід користувача з 2FA через Celery."""
     if request.user.is_authenticated:
         return redirect('profile')
 
@@ -131,13 +127,9 @@ def login_view(request):
                     user.two_factor_code_expires = timezone.now() + timedelta(seconds=settings.TWO_FACTOR_CODE_VALIDITY)
                     user.save()
 
-                    send_mail(
-                        _('Your Two-Factor Authentication Code'),
-                        _('Your verification code is: %(code)s') % {'code': code},
-                        settings.EMAIL_HOST_USER,
-                        [user.email],
-                        fail_silently=False,
-                    )
+                    subject = _('Your Two-Factor Authentication Code')
+                    message = _('Your verification code is: %(code)s') % {'code': code}
+                    send_email_task.delay(subject, message, [user.email])
 
                     request.session['user_to_authenticate'] = user.id
                     request.session.modified = True
@@ -244,7 +236,7 @@ def change_password(request):
 @login_required
 @csrf_protect
 def delete_account(request):
-    """Запланувати видалення акаунту через 30 днів (soft delete)."""
+    """Запланувати видалення акаунту через 30 днів (soft delete) з повідомленням через Celery."""
     if request.method == 'POST':
         form = AccountDeleteForm(request.POST)
         if form.is_valid():
@@ -254,13 +246,9 @@ def delete_account(request):
                 user.deleted_at = timezone.now()
                 user.save()
 
-                send_mail(
-                    _('Account Deletion Scheduled'),
-                    _('Your account is scheduled for deletion in 30 days. You can restore it anytime before then.'),
-                    settings.EMAIL_HOST_USER,
-                    [user.email],
-                    fail_silently=False,
-                )
+                subject = _('Account Deletion Scheduled')
+                message = _('Your account is scheduled for deletion in 30 days. You can restore it anytime before then.')
+                send_email_task.delay(subject, message, [user.email])
 
                 messages.success(request, _('Your account is scheduled for deletion in 30 days. You can restore it anytime before then.'))
                 return redirect('profile')
@@ -268,6 +256,7 @@ def delete_account(request):
     else:
         form = AccountDeleteForm()
     return render(request, 'registration/delete_account.html', {'form': form})
+
 
 
 @login_required
@@ -290,7 +279,7 @@ def permanent_delete_account_view(request):
     return render(request, 'registration/permanent_delete_account.html', {'form': form})
 
 @login_required
-def restore_account(request):
+def cancel_account_deletion(request):
     user = request.user
     if user.is_pending_deletion():
         user.restore()
@@ -298,3 +287,5 @@ def restore_account(request):
     else:
         messages.info(request, _('Your account is not scheduled for deletion.'))
     return redirect('profile')
+
+

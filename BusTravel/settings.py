@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'Registration.apps.RegistrationConfig',
     'django_recaptcha',
+    'celery',
 ]
 
 MIDDLEWARE = [
@@ -129,7 +130,7 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'bustravel1546@gmail.com'
-EMAIL_HOST_PASSWORD = 'ziad azmx long gvde'
+EMAIL_HOST_PASSWORD = 'qgmc uxrr odfb yasx'
 DEFAULT_FROM_EMAIL = 'bustravel1546@gmail.com'
 
 # Default primary key field
@@ -148,3 +149,7 @@ AUTHENTICATION_BACKENDS = [
     'Registration.backends.EmailOrUsernameModelBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+
