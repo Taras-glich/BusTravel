@@ -1,0 +1,22 @@
+{% extends "registration/base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="container text-center mt-5">
+    <h2>{% trans "Запит на видалення отримано" %}</h2>
+    <p class="lead">
+        {% blocktrans with email=email %}
+        На вашу електронну адресу <strong>{{ email }}</strong> було надіслано лист з посиланням для підтвердження повного видалення акаунту.
+        {% endblocktrans %}
+    </p>
+    <p>
+        {% trans "Будь ласка, перевірте свою пошту та перейдіть за посиланням, щоб завершити процес видалення." %}
+    </p>
+    <p class="text-muted">
+        {% trans "Якщо ви не отримали лист, перевірте папку 'Спам'." %}
+    </p>
+    <a href="{% url 'home' %}" class="btn btn-primary mt-3">
+        {% trans "На головну сторінку" %}
+    </a>
+</div>
+{% endblock %}

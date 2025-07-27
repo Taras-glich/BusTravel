@@ -1,11 +1,22 @@
-{% extends 'registration/base.html' %}
+{% extends "registration/base.html" %}
+{% load i18n %}
+
 {% block content %}
-  <h2>Permanent Account Deletion</h2>
-  <p>Are you sure you want to permanently delete your account? This action cannot be undone.</p>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-danger">Delete Permanently</button>
-    <a href="{% url 'profile' %}" class="btn btn-secondary">Cancel</a>
-  </form>
+<div class="container">
+    <h2>{% trans "Повне видалення акаунту" %}</h2>
+    <p class="text-danger">
+        {% trans "Увага! Ця дія є незворотною. Після повного видалення всі ваші дані буде втрачено назавжди." %}
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-danger">
+            {% trans "Запросити повне видалення" %}
+        </button>
+        <a href="{% url 'profile' %}" class="btn btn-secondary">
+            {% trans "Скасувати" %}
+        </a>
+    </form>
+</div>
 {% endblock %}

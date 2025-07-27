@@ -17,4 +17,6 @@ urlpatterns = [
     path('restore-account/', views.cancel_account_deletion, name='cancel_account_deletion'),
     path('permanent-delete-account/', views.permanent_delete_account_view, name='permanent_delete_account'),
     path('restore_account/', views.cancel_account_deletion, name='restore_account'),
+    path('confirm-permanent-delete/', views.confirm_permanent_delete_view, name='confirm_permanent_delete'),
+    path('blanck/', views.blanck, name='blanck'),
 ]

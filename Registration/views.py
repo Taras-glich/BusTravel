@@ -74,15 +74,16 @@ def register_view(request):
             message = _('Перейдіть за посиланням для підтвердження: %(url)s') % {'url': verify_url}
             send_email_task.delay(subject, message, [user.email])
 
-            messages.success(request, _('На вашу пошту надіслано лист для підтвердження.'))
-            return redirect('login')
+            # Змінено: перенаправлення на сторінку "thank you" замість login
+            return render(request, 'registration/registration_thanks.html', {
+                'email': user.email
+            })
     else:
         form = RegisterForm()
     return render(request, 'registration/register.html', {'form': form})
 
-
 def verify_email_link_view(request):
-    """Перевірка email-посилання."""
+    """Перевірка email-посилання та автоматичний вхід користувача."""
     token = request.GET.get('token')
     if not token:
         messages.error(request, _('Неправильне посилання для підтвердження.'))
@@ -102,11 +103,14 @@ def verify_email_link_view(request):
     user.is_active = True
     user.save()
 
+    # Вказуємо конкретний бекенд для аутентифікації
+    backend = 'django.contrib.auth.backends.ModelBackend'  # або ваш кастомний бекенд
+    login(request, user, backend=backend)
+
     verification.mark_used()
 
-    messages.success(request, _('Ваш email підтверджено! Тепер ви можете увійти.'))
-    return redirect('login')
-
+    messages.success(request, _('Ваш email підтверджено! Ви успішно ввійшли в систему.'))
+    return redirect('profile')
 
 @csrf_protect
 def login_view(request):
@@ -258,25 +262,84 @@ def delete_account(request):
     return render(request, 'registration/delete_account.html', {'form': form})
 
 
-
 @login_required
 @csrf_protect
 def permanent_delete_account_view(request):
-    """Повне видалення акаунту з БД."""
+    """Повне видалення акаунту з БД з підтвердженням через email."""
     if request.method == 'POST':
         form = AccountDeleteForm(request.POST)
         if form.is_valid():
             password = form.cleaned_data['password']
             user = authenticate(username=request.user.username, password=password)
+
             if user is not None:
-                user.permanent_delete()
-                logout(request)
-                messages.success(request, _('Your account has been permanently deleted.'))
-                return redirect('home')
-            messages.error(request, _('Incorrect password.'))
+                # Генеруємо токен для підтвердження видалення
+                token = secrets.token_urlsafe(32)
+                expires_at = timezone.now() + timedelta(hours=24)
+
+                # Зберігаємо токен в сесії
+                request.session['permanent_delete_token'] = token
+                request.session['permanent_delete_expires'] = expires_at.isoformat()
+                request.session.modified = True
+
+                # Відправляємо email з посиланням для підтвердження
+                delete_url = request.build_absolute_uri(
+                    reverse('confirm_permanent_delete') + '?' + urlencode({'token': token})
+                )
+
+                subject = _('Підтвердіть повне видалення акаунту')
+                message = _(
+                    'Ви запросили повне видалення вашого акаунту. '
+                    'Будь ласка, перейдіть за посиланням для підтвердження: %(url)s\n\n'
+                    'Якщо ви не запитували це видалення, проігноруйте цей лист.'
+                ) % {'url': delete_url}
+
+                send_email_task.delay(subject, message, [user.email])
+
+                # Перенаправляємо на пусту сторінку з повідомленням
+                return render(request, 'registration/delete_confirmation_sent.html', {
+                    'email': user.email
+                })
+
+            messages.error(request, _('Неправильний пароль.'))
     else:
         form = AccountDeleteForm()
+
     return render(request, 'registration/permanent_delete_account.html', {'form': form})
+
+
+def confirm_permanent_delete_view(request):
+    """Підтвердження повного видалення акаунту через email."""
+    token = request.GET.get('token')
+    if not token:
+        messages.error(request, _('Неправильне посилання для підтвердження.'))
+        return redirect('profile')
+
+    # Перевіряємо токен з сесії
+    session_token = request.session.get('permanent_delete_token')
+    expires_at = request.session.get('permanent_delete_expires')
+
+    if not session_token or not expires_at or token != session_token:
+        messages.error(request, _('Неправильний токен підтвердження.'))
+        return redirect('profile')
+
+    if timezone.now() > timezone.datetime.fromisoformat(expires_at):
+        messages.error(request, _('Термін дії посилання для підтвердження минув.'))
+        return redirect('profile')
+
+    # Видаляємо акаунт
+    user = request.user
+    user.permanent_delete()
+    logout(request)
+
+    # Очищаємо сесійні дані
+    if 'permanent_delete_token' in request.session:
+        del request.session['permanent_delete_token']
+    if 'permanent_delete_expires' in request.session:
+        del request.session['permanent_delete_expires']
+
+    messages.success(request, _('Ваш акаунт було повністю видалено.'))
+    return redirect('home')
 
 @login_required
 def cancel_account_deletion(request):
@@ -289,3 +352,5 @@ def cancel_account_deletion(request):
     return redirect('profile')
 
 
+def blanck(request):
+    return render(request, 'registration/blanck.html')

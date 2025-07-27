@@ -1,0 +1,14 @@
+{% extends "registration/base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="container">
+    <h2>{% trans "Підтвердження видалення" %}</h2>
+    <p>
+        {% trans "Ваш акаунт успішно видалено." %}
+    </p>
+    <a href="{% url 'home' %}" class="btn btn-primary">
+        {% trans "На головну" %}
+    </a>
+</div>
+{% endblock %}
