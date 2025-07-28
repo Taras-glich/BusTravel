@@ -1,7 +1,12 @@
-import secrets
 import random
+import secrets
 import string
 from datetime import timedelta
+
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth.views import PasswordResetConfirmView
+from django.utils.encoding import force_bytes
+
 from .tasks import send_email_task
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
@@ -9,9 +14,9 @@ from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib import messages
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
-from django.utils.http import urlencode
+from django.utils.http import urlencode, urlsafe_base64_encode
 from django.utils.translation import gettext_lazy as _
 from django.http import HttpResponseRedirect
 from django.utils.translation.trans_real import activate
@@ -19,7 +24,7 @@ from django.views.decorators.csrf import csrf_protect
 
 from .forms import (
     RegisterForm, LoginForm, TwoFactorForm,
-    CustomPasswordChangeForm, AccountDeleteForm, LanguageForm
+    CustomPasswordChangeForm, AccountDeleteForm, LanguageForm, CustomPasswordResetForm
 )
 from .models import User, EmailVerification
 
@@ -114,7 +119,7 @@ def verify_email_link_view(request):
 
 @csrf_protect
 def login_view(request):
-    """Вхід користувача з 2FA через Celery."""
+    """Вхід користувача з підтримкою двофакторної автентифікації (2FA)."""
     if request.user.is_authenticated:
         return redirect('profile')
 
@@ -124,27 +129,35 @@ def login_view(request):
             user = form.get_user()
             if user:
                 if user.is_pending_deletion():
-                    messages.warning(request, _('Ваш акаунт заплановано на видалення. Ви можете його відновити у профілі.'))
+                    messages.warning(request, 'Ваш акаунт заплановано на видалення. Ви можете відновити його у профілі.')
+
                 if user.two_factor_auth:
+                    # Генеруємо код 2FA
                     code = ''.join(random.choices(string.digits, k=settings.TWO_FACTOR_CODE_LENGTH))
                     user.two_factor_code = code
                     user.two_factor_code_expires = timezone.now() + timedelta(seconds=settings.TWO_FACTOR_CODE_VALIDITY)
                     user.save()
 
-                    subject = _('Your Two-Factor Authentication Code')
-                    message = _('Your verification code is: %(code)s') % {'code': code}
+                    # Відправляємо код на email асинхронно через Celery
+                    subject = 'Your Two-Factor Authentication Code'
+                    message = f'Your verification code is: {code}'
                     send_email_task.delay(subject, message, [user.email])
 
+                    # Зберігаємо id користувача в сесії для подальшої перевірки коду
                     request.session['user_to_authenticate'] = user.id
                     request.session.modified = True
+
                     return redirect('two_factor_verify')
                 else:
-                    login(request, user)
-                    messages.success(request, _('Welcome back, %(username)s!') % {'username': user.username})
+                    # Виклик login з вказанням бекенду, щоб уникнути ValueError при кількох бекендах
+                    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                    messages.success(request, f'Welcome back, {user.username}!')
                     return redirect('profile')
-        messages.error(request, _('Invalid username or password.'))
+
+        messages.error(request, 'Невірне ім’я користувача або пароль.')
     else:
         form = LoginForm()
+
     return render(request, 'registration/login.html', {'form': form})
 
 
@@ -352,5 +365,54 @@ def cancel_account_deletion(request):
     return redirect('profile')
 
 
-def blanck(request):
-    return render(request, 'registration/blanck.html')
+def password_reset_view(request):
+    """Скидання пароля через email (крок 1)."""
+    if request.method == 'POST':
+        form = CustomPasswordResetForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            try:
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                messages.error(request, _('Користувача з таким email не знайдено.'))
+                return redirect('password_reset')
+
+            # Генеруємо токен та посилання
+            token = default_token_generator.make_token(user)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+
+            reset_url = request.build_absolute_uri(
+                reverse('password_reset_confirm', kwargs={'uidb64': uid, 'token': token})
+            )
+
+            # Відправляємо email через Celery
+            subject = _('Скидання пароля')
+            message = _(
+                'Ви отримали цей лист, тому що хтось запросив скидання пароля для вашого акаунту.\n\n'
+                'Перейдіть за посиланням, щоб встановити новий пароль:\n%(url)s\n\n'
+                'Якщо ви не запитували скидання пароля, проігноруйте цей лист.'
+            ) % {'url': reset_url}
+
+            send_email_task.delay(subject, message, [email])
+            return redirect('password_reset_done')
+    else:
+        form = CustomPasswordResetForm()
+    return render(request, 'registration/password_reset_form.html', {'form': form})
+
+
+def password_reset_done_view(request):
+    """Повідомлення про відправлений email (крок 2)."""
+    return render(request, 'registration/password_reset_done.html')
+
+
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    """Встановлення нового пароля (крок 3)."""
+    template_name = 'registration/password_reset_confirm.html'
+    success_url = reverse_lazy('password_reset_complete')
+
+
+def password_reset_complete_view(request):
+    """Повідомлення про успішну зміну пароля (крок 4)."""
+    return render(request, 'registration/password_reset_complete.html')
+
+

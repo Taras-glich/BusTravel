@@ -1,6 +1,6 @@
-# Registration/urls.py
 from django.urls import path
 from . import views
+from .views import CustomPasswordResetConfirmView  # Додайте цей імпорт
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -14,9 +14,16 @@ urlpatterns = [
     path('change-password/', views.change_password, name='change_password'),
     path('delete-account/', views.delete_account, name='delete_account'),
     path('change-language/', views.change_language, name='change_language'),
-    path('restore-account/', views.cancel_account_deletion, name='cancel_account_deletion'),
-    path('permanent-delete-account/', views.permanent_delete_account_view, name='permanent_delete_account'),
-    path('restore_account/', views.cancel_account_deletion, name='restore_account'),
-    path('confirm-permanent-delete/', views.confirm_permanent_delete_view, name='confirm_permanent_delete'),
-    path('blanck/', views.blanck, name='blanck'),
+    path('restore-account/', views.cancel_account_deletion, name='restore_account'),  # Видалено дубль
+
+    # URL для видалення акаунту
+    path('account/permanent-delete/', views.permanent_delete_account_view, name='permanent_delete_account'),
+    path('account/confirm-delete/', views.confirm_permanent_delete_view, name='confirm_permanent_delete'),
+
+    # URL для скидання пароля
+    path('password-reset/', views.password_reset_view, name='password_reset'),
+    path('password-reset/done/', views.password_reset_done_view, name='password_reset_done'),
+    path('reset/<uidb64>/<token>/', CustomPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    # Використовуємо клас
+    path('reset/done/', views.password_reset_complete_view, name='password_reset_complete'),
 ]
